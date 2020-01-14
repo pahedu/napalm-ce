@@ -53,3 +53,9 @@ Check the full [NAPALM Docs](https://napalm.readthedocs.io/en/latest/index.html)
 You can download Huawei eNSP simulator for free from [Huawei website](http://support.huawei.com/enterprise/wn/network-management/ensp-pid-9017384/software) after make an account. You can learn how to install it by this [tutorial](https://www.youtube.com/watch?v=Yw8HPPwrzZU).
 
 
+get_environment не работает с S
+get_arp_table не работает с S
+get_config не дописана
+get_lldp_neighbors не работает с S
+get_mac_address_table не работает с S
+get_users не работает с S

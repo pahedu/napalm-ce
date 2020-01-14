@@ -16,3 +16,41 @@ Interface                  PHY      Protocol  InUti OutUti   inErrors  outErrors
 40GE1/0/3                  *down    down         0%     0%          0          0
 40GE3/0/2                  up       up        0.01%  0.01%          0          0
 40GE1/0/5                  down     down         0%     0%          0          0
+
+------------------------------------------------------------------------------------------------------------------------
+
+PHY: Physical
+*down: administratively down
+#down: LBDT down
+(l): loopback
+(s): spoofing
+(b): BFD down
+(e): ETHOAM down
+(dl): DLDP down
+(lb): LBDT block
+InUti/OutUti: input utility/output utility
+Interface                   PHY   Protocol  InUti OutUti   inErrors  outErrors
+GigabitEthernet0/0/1        down  down         0%     0%          0          0
+GigabitEthernet0/0/2        down  down         0%     0%          0          0
+GigabitEthernet0/0/3        down  down         0%     0%          0          0
+GigabitEthernet0/0/4        down  down         0%     0%          0          0
+GigabitEthernet0/0/5        down  down         0%     0%          0          0
+GigabitEthernet0/0/6        down  down         0%     0%          0          0
+GigabitEthernet0/0/7        down  down         0%     0%          0          0
+GigabitEthernet0/0/8        down  down         0%     0%          0          0
+GigabitEthernet0/0/9        down  down         0%     0%          0          0
+GigabitEthernet0/0/10       down  down         0%     0%          0          0
+GigabitEthernet0/0/11       down  down         0%     0%          0          0
+GigabitEthernet0/0/12       down  down         0%     0%          0          0
+GigabitEthernet0/0/13       down  down         0%     0%          0          0
+GigabitEthernet0/0/14       down  down         0%     0%          0          0
+GigabitEthernet0/0/15       down  down         0%     0%          0          0
+GigabitEthernet0/0/16       down  down         0%     0%          0          0
+GigabitEthernet0/0/17       down  down         0%     0%          0          0
+GigabitEthernet0/0/18       down  down         0%     0%          0          0
+GigabitEthernet0/0/19       down  down         0%     0%          0          0
+GigabitEthernet0/0/20       down  down         0%     0%          0          0
+GigabitEthernet0/0/21       down  down         0%     0%          0          0
+GigabitEthernet0/0/22       down  down         0%     0%          0          0
+GigabitEthernet0/0/23       down  down         0%     0%          0          0
+GigabitEthernet0/0/24       down  down         0%     0%          0          0

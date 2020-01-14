@@ -15,3 +15,21 @@ CE6850-48S6Q-HI version information
 4. CPLD1  Version : 100
 5. CPLD2  Version : 100
 6. BIOS   Version : 312
+
+------------------------------------------------------------------------------------------------------------------------
+
+Huawei Versatile Routing Platform Software
+VRP (R) software, Version 5.170 (S1720GWR V200R011C10SPC600)
+Copyright (C) 2000-2018 HUAWEI TECH Co., Ltd.
+HUAWEI S1720-52GWR-PWR-4X Routing Switch uptime is 0 week, 0 day, 17 hours, 3 minutes
+
+ES5D2V52S008 0(Master)  : uptime is 0 week, 0 day, 17 hours, 2 minutes
+DDR             Memory Size : 512   M bytes
+FLASH Total     Memory Size : 512   M bytes
+FLASH Available Memory Size : 238   M bytes
+Pcb           Version   : VER.E
+BootROM       Version   : 020b.0a05
+BootLoad      Version   : 020b.0a06
+CPLD          Version   : 0107
+Software      Version   : VRP (R) Software, Version 5.170 (V200R011C10SPC600)
+FLASH         Version   : 0x0

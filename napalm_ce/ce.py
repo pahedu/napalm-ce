@@ -52,6 +52,25 @@ DAY_SECONDS = 24 * HOUR_SECONDS
 WEEK_SECONDS = 7 * DAY_SECONDS
 YEAR_SECONDS = 365 * DAY_SECONDS
 
+# STD REGEX PATTERNS
+IP_ADDR_REGEX = r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}"
+IPV4_ADDR_REGEX = IP_ADDR_REGEX
+IPV6_ADDR_REGEX_1 = r"::"
+IPV6_ADDR_REGEX_2 = r"[0-9a-fA-F:]{1,39}::[0-9a-fA-F:]{1,39}"
+IPV6_ADDR_REGEX_3 = r"[0-9a-fA-F]{1,3}:[0-9a-fA-F]{1,3}:[0-9a-fA-F]{1,3}:[0-9a-fA-F]{1,3}:" \
+                     "[0-9a-fA-F]{1,3}:[0-9a-fA-F]{1,3}:[0-9a-fA-F]{1,3}:[0-9a-fA-F]{1,3}"
+# Should validate IPv6 address using an IP address library after matching with this regex
+IPV6_ADDR_REGEX = "(?:{}|{}|{})".format(IPV6_ADDR_REGEX_1, IPV6_ADDR_REGEX_2, IPV6_ADDR_REGEX_3)
+
+MAC_REGEX = r"[a-fA-F0-9]{4}\.[a-fA-F0-9]{4}\.[a-fA-F0-9]{4}"
+VLAN_REGEX = r"\d{1,4}"
+RE_IPADDR = re.compile(r"{}".format(IP_ADDR_REGEX))
+RE_IPADDR_STRIP = re.compile(r"({})\n".format(IP_ADDR_REGEX))
+RE_MAC = re.compile(r"{}".format(MAC_REGEX))
+
+# Period needed for 32-bit AS Numbers
+ASN_REGEX = r"[\d\.]+"
+
 
 class CEDriver(NetworkDriver):
     """Napalm driver for HUAWEI CloudEngine."""
@@ -121,7 +140,7 @@ class CEDriver(NetworkDriver):
 
     def close(self):
         """Close the connection to the device."""
-        if self.changed and self.backup_file is not "":
+        if self.changed and self.backup_file != "":
             self._delete_file(self.backup_file)
         self.device.disconnect()
         self.device = None
@@ -172,17 +191,18 @@ class CEDriver(NetworkDriver):
         show_ver = self.device.send_command('display version')
         show_hostname = self.device.send_command('display current-configuration | inc sysname')
         show_int_status = self.device.send_command('display interface brief')
+        show_esn = self.device.send_command('display esn')
 
-        # serial_number/IOS version/uptime/model
+        # serial_number/VRP version/uptime/model
         for line in show_ver.splitlines():
             if 'VRP (R) software' in line:
-                search_result = re.search(r"\((?P<serial_number>CE\S+)\s+(?P<os_version>V\S+)\)", line)
+                search_result = re.search(r"\((?P<model>CE\S+|S\S+)\s+(?P<os_version>V\S+)\)", line)
                 if search_result is not None:
-                    serial_number = search_result.group('serial_number')
+                    model = search_result.group('model')
                     os_version = search_result.group('os_version')
 
             if 'HUAWEI' in line and 'uptime is' in line:
-                search_result = re.search(r"CE\S+", line)
+                search_result = re.search(r"CE\S+|S\S+", line)
                 if search_result is not None:
                     model = search_result.group(0)
                 uptime = self._parse_uptime(line)
@@ -191,6 +211,11 @@ class CEDriver(NetworkDriver):
         if 'sysname ' in show_hostname:
             _, hostname = show_hostname.split("sysname ")
             hostname = hostname.strip()
+            fqdn = hostname
+
+        if 'ESN ' in show_esn:
+            _, serial_number = show_esn.split(":")
+            serial_number = serial_number.strip()
 
         # interface_list filter
         interface_list = []
@@ -214,13 +239,27 @@ class CEDriver(NetworkDriver):
         }
 
     def cli(self, commands):
-        """Execute raw CLI commands and returns their output."""
+        """
+        Execute a list of commands and return the output in a dictionary format using the command
+        as the key.
+
+        Example input:
+        ['display ', 'show calendar']
+
+        Output example:
+        {   'display esn': u'ESN of slot 1: serial_nubmer',
+            'display clock': u'2018-01-14 10:55:38+03:00/n Tuesday/n Time Zone(UTC) : UTC+00:00'}
+
+        """
+
         cli_output = {}
         if type(commands) is not list:
             raise TypeError('Please enter a valid list of commands!')
 
         for command in commands:
             output = self.device.send_command(command)
+            if 'Error: Unrecognized command found' in output:
+                raise ValueError('Unable to execute command "{}"'.format(command))
             cli_output[py23_compat.text_type(command)] = output
         return cli_output
 
@@ -304,7 +343,7 @@ class CEDriver(NetworkDriver):
         re_protocol = r"Line protocol current state\W+(?P<protocol>.+)$"
         re_mac = r"Hardware address is\W+(?P<mac_address>\S+)"
         re_speed = r"^Speed\W+(?P<speed>\d+|\w+)"
-        re_description = r"^Description\W+(?P<description>.*)$"
+        re_description = r"^Description:(?P<description>.*)$"
 
         new_interfaces = self._separate_section(separator, output)
         for interface in new_interfaces:
@@ -1179,3 +1218,5 @@ class CEDriver(NetworkDriver):
         with open(filename, 'wt') as fobj:
             fobj.write(config)
         return filename
+
+

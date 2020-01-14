@@ -2,3 +2,10 @@ Local Interface         Exptime(s) Neighbor Interface      Neighbor Device
 -------------------------------------------------------------------------------
 10GE4/0/1                     111  10GE4/0/25              HUAWEI
 10GE4/0/1                     121  10GE4/0/26              HUAWEI2
+
+------------------------------------------------------------------------------------------------------------------------
+
+Local Intf    Neighbor Dev             Neighbor Intf             Exptime(s)
+XGE0/0/3      psg-asw121-f2            XGE0/0/4                  107
+XGE0/0/4      psg-asw29-f2             XGE0/0/3                  106
+​

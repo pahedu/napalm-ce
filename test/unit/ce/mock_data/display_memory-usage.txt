@@ -1,0 +1,4 @@
+ Memory utilization statistics at 2000-04-26 08:36:59+03:00
+ System Total Memory Is: 354418688 bytes
+ Total Memory Used Is: 83380084 bytes
+ Memory Using Percentage Is: 23%

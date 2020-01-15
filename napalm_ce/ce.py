@@ -598,65 +598,128 @@ class CEDriver(NetworkDriver):
             }
         }
         """
-        environment = {}
+        platform = self._get_platform()
+        if platform == "CE":
+            environment = {}
 
-        fan_cmd = 'display device fan'
-        power_cmd = 'display device power'
-        temp_cmd = 'display device temperature all'
-        cpu_cmd = 'display cpu'
-        mem_cmd = 'display memory'
+            fan_cmd = 'display device fan'
+            power_cmd = 'display device power'
+            temp_cmd = 'display device temperature all'
+            cpu_cmd = 'display cpu'
+            mem_cmd = 'display memory'
 
-        output = self.device.send_command(fan_cmd)
-        environment.setdefault('fans', {})
-        match = re.findall(r"(?P<id>FAN\S+).+(?P<status>Normal|Abnormal)", output, re.M)
-        # if match:
-        for fan in match:
-            status = True if fan[1] == "Normal" else False
-            environment['fans'].setdefault(fan[0], {})['status'] = status
+            output = self.device.send_command(fan_cmd)
+            environment.setdefault('fans', {})
+            match = re.findall(r"(?P<id>FAN\S+).+(?P<status>Normal|Abnormal)", output, re.M)
+            # if match:
+            for fan in match:
+                status = True if fan[1] == "Normal" else False
+                environment['fans'].setdefault(fan[0], {})['status'] = status
 
-        output = self.device.send_command(power_cmd)
-        environment.setdefault('power', {})
-        re_power = r"(?P<id>PWR\S+).+(?P<status>Supply|NotSupply|Sleep)\s+\S+\s+\S+\s+" \
-                   r"(?P<output>\d+)\s+(?P<capacity>\d+)"
-        match = re.findall(re_power, output, re.M)
+            output = self.device.send_command(power_cmd)
+            environment.setdefault('power', {})
+            re_power = r"(?P<id>PWR\S+).+(?P<status>\s+Supply|NotSupply|Sleep)\s+\S+\s+\S+\s+" \
+                       r"(?P<output>\d+)\s+(?P<capacity>\d+)"
+            match = re.findall(re_power, output, re.M)
 
-        for power in match:
-            status = True if power[1] == "Supply" else False
-            environment['power'].setdefault(power[0], {})['status'] = status
-            environment['power'][power[0]]['output'] = float(power[2])
-            environment['power'][power[0]]['capacity'] = float(power[3])
+            for power in match:
+                status = True if power[1] == "Supply" else False
+                environment['power'].setdefault(power[0], {})['status'] = status
+                environment['power'][power[0]]['output'] = float(power[2])
+                environment['power'][power[0]]['capacity'] = float(power[3])
 
-        output = self.device.send_command(temp_cmd)
-        environment.setdefault('temperature', {})
-        re_temp = r"(?P<name>\S+)\s+(?P<status>NORMAL|MAJOR|FATAL|ABNORMAL)\s+\S+\s+\S+\s+(?P<temperature>\d+)"
-        match = re.findall(re_temp, output, re.M)
+            output = self.device.send_command(temp_cmd)
+            environment.setdefault('temperature', {})
+            re_temp = r"(?P<name>\S+)\s+(?P<status>NORMAL|MAJOR|FATAL|ABNORMAL|MINOR)\s+\S+\s+\S+\s+(?P<temperature>\d+)"
+            match = re.findall(re_temp, output, re.M)
 
-        for temp in match:
-            environment['temperature'].setdefault(temp[0], {})
-            name = temp[0]
-            is_alert = True if temp[1] == "MAJOR" else False
-            is_critical = True if temp[1] == "FATAL" else False
-            environment['temperature'][name]['temperature'] = float(temp[2])
-            environment['temperature'][name]['is_alert'] = is_alert
-            environment['temperature'][name]['is_critical'] = is_critical
+            for temp in match:
+                environment['temperature'].setdefault(temp[0], {})
+                name = temp[0]
+                is_alert = True if temp[1] != "NORMAL" else False
+                is_critical = True if temp[1] == "FATAL" else False
+                environment['temperature'][name]['temperature'] = float(temp[2])
+                environment['temperature'][name]['is_alert'] = is_alert
+                environment['temperature'][name]['is_critical'] = is_critical
 
-        output = self.device.send_command(cpu_cmd)
-        environment.setdefault('cpu', {})
-        match = re.findall(r"cpu(?P<id>\d+)\s+(?P<usage>\d+)%", output, re.M)
+            output = self.device.send_command(cpu_cmd)
+            environment.setdefault('cpu', {})
+            match = re.findall(r"cpu(?P<id>\d+)\s+(?P<usage>\d+)%", output, re.M)
 
-        for cpu in match:
-            usage = float(cpu[1])
-            environment['cpu'].setdefault(cpu[0], {})['%usage'] = usage
+            for cpu in match:
+                usage = float(cpu[1])
+                environment['cpu'].setdefault(cpu[0], {})['%usage'] = usage
 
-        output = self.device.send_command(mem_cmd)
-        environment.setdefault('memory', {'available_ram': 0, 'used_ram': 0})
-        match = re.search(r"System Total Memory:\s+(?P<available_ram>\d+)", output, re.M)
-        if match is not None:
-            environment['memory']['available_ram'] = int(match.group("available_ram"))
+            output = self.device.send_command(mem_cmd)
+            environment.setdefault('memory', {'available_ram': 0, 'used_ram': 0})
+            match = re.search(r"System Total Memory:\s+(?P<available_ram>\d+)", output, re.M)
+            if match is not None:
+                environment['memory']['available_ram_kB'] = int(match.group("available_ram"))
 
-        match = re.search(r"Total Memory Used:\s+(?P<used_ram>\d+)", output, re.M)
-        if match is not None:
-            environment['memory']['used_ram'] = int(match.group("used_ram"))
+            match = re.search(r"Total Memory Used:\s+(?P<used_ram>\d+)", output, re.M)
+            if match is not None:
+                environment['memory']['used_ram_kB'] = int(match.group("used_ram"))
+
+        elif platform == "S":
+            environment = {}
+
+            fan_cmd = 'display fan'
+            power_cmd = 'display  power'
+            temp_cmd = 'display  temperature all'
+            cpu_cmd = 'display cpu'
+            mem_cmd = 'display memory-usage'
+
+            output = self.device.send_command(fan_cmd)
+            environment.setdefault('fans', {})
+            match = re.findall(r"(?P<id>\d+)\s+Present\s+(?P<status>Normal|Abnormal)", output, re.M)
+            # if match:
+            for fan in match:
+                status = True if fan[1] == "Normal" else False
+                environment['fans'].setdefault(fan[0], {})['status'] = status
+
+            output = self.device.send_command(power_cmd)
+            environment.setdefault('power', {})
+            re_power = r"(?P<id>PWR\S+).+(?P<status>\s+Supply|NotSupply|Sleep)\s+(?P<capacity>\d+)"
+            match = re.findall(re_power, output, re.M)
+
+            for power in match:
+                status = True if power[1] == "Supply" else False
+                environment['power'].setdefault(power[0], {})['status'] = status.strip()
+                environment['power'][power[0]]['capacity'] = float(power[2])
+
+            output = self.device.send_command(temp_cmd)
+            output.upper()
+            environment.setdefault('temperature', {})
+            re_temp = r"(?P<name>\S+)\s+(?P<status>NORMAL|MAJOR|FATAL|ABNORMAL|MINOR)\s+(?P<temperature>\d+)"
+            match = re.findall(re_temp, output, re.M)
+
+            for temp in match:
+                environment['temperature'].setdefault(temp[0], {})
+                name = temp[0]
+                is_alert = True if temp[1] != "NORMAL" else False
+                is_critical = True if temp[1] == "FATAL" else False
+                environment['temperature'][name]['temperature'] = float(temp[2])
+                environment['temperature'][name]['is_alert'] = is_alert
+                environment['temperature'][name]['is_critical'] = is_critical
+
+            output = self.device.send_command(cpu_cmd)
+            environment.setdefault('cpu', {})
+            match = re.findall(r"CPU Usage\s+:\s+(?P<usage>\d+)%", output, re.M)
+
+            for cpu in match:
+                usage = float(cpu)
+                environment['cpu'].setdefault(cpu[0], {})['%usage'] = usage
+
+            output = self.device.send_command(mem_cmd)
+            environment.setdefault('memory', {'available_ram': 0, 'used_ram': 0})
+            match = re.search(r"System Total Memory Is:\s+(?P<available_ram>\d+)", output, re.M)
+            if match is not None:
+                environment['memory']['available_ram_B'] = int(match.group("available_ram"))
+
+            match = re.search(r"Total Memory Used Is:\s+(?P<used_ram>\d+)", output, re.M)
+            if match is not None:
+                environment['memory']['used_ram_B'] = int(match.group("used_ram"))
+
         return environment
 
     def get_arp_table(self):
@@ -1220,7 +1283,7 @@ class CEDriver(NetworkDriver):
             fobj.write(config)
         return filename
 
-    def _platform_determine(self):
+    def _get_platform(self):
         platform = 'Unknown'
         show_ver = self.device.send_command('display version')
         for line in show_ver.splitlines():

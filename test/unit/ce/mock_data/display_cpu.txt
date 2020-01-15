@@ -50,3 +50,63 @@ cpu1        14%      14%      11%      11%  93% 2018-05-22 00:02:22
 cpu2        15%      14%      14%      13%  90% 2018-05-22 00:02:22
 cpu3         1%       1%       1%       0%  42% 2018-05-25 00:02:21
 ----------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------------------------------
+
+CPU Usage Stat. Cycle: 60 (Second)
+CPU Usage            : 14% Max: 83%
+CPU Usage Stat. Time : 2000-04-26  08:35:58
+CPU utilization for five seconds: 14%: one minute: 14%: five minutes: 14%
+Max CPU Usage Stat. Time : 2000-04-20 00:01:48.
+
+TaskName             CPU  Runtime(CPU Tick High/Tick Low)  Task Explanation
+VIDL                 86%         2/671eb3fe       DOPRA IDLE
+OS                   10%         0/47868bff       Operation System
+SFPT                  1%         0/ cdfe600       SFPT Timer
+TICK                  1%         0/ bcd3d80
+VT0                   1%         0/ 7bfa480       VT0 Line user's task
+linkscan              1%         0/ c0a4680
+AAA                   0%         0/       0       AAA  Authen Account Authorize
+ACL                   0%         0/  3d0900       ACL Access Control List
+ADPT                  0%         0/       0       ADPT Adapter
+AGNT                  0%         0/       0       AGNTSNMP agent task
+AGT6                  0%         0/       0       AGT6SNMP AGT6 task
+ALM                   0%         0/       0       ALM  Alarm Management
+ALS                   0%         0/  1e8480       ALS  Loss of Signal
+AM                    0%         0/       0       AM   Address Management
+APP                   0%         0/       0       APP
+ARP                   0%         0/       0       ARP
+ASFI                  0%         0/       0       ASFI
+ASFM                  0%         0/       0       ASFM
+BFD                   0%         0/  d59f80       BFD Bidirection Forwarding
+                                                  Detect
+BOX_Out               0%         0/  f42400
+BPDU                  0%         0/       0       BPDU Adapter
+BTRC                  0%         0/       0       BTRC
+CAPM                  0%         0/       0       CAPM Capture Packet
+CFGM                  0%         0/       0       CFGMGR  Configuration
+                                                  Management
+CFM                   0%         0/       0       CFM Configuration file
+                                                  management
+CLKI                  0%         0/       0       CLKI
+CMD_Switching_lsn     0%         0/       0
+DEFD                  0%         0/  3d0900       DEFD CPU Defend
+DELM                  0%         0/       0       DELMAC delete mac address
+DEV                   0%         0/       0       DEV  Device Management
+DEVA                  0%         0/       0       DEVA Device Assistant
+DHCP                  0%         0/  1e8480       DHCP Dynamic Host Config
+                                                  Protocol
+DLDP                  0%         0/       0       DLDP Protocol
+EAP                   0%         0/       0       EAP  Extensible Authen
+                                                  Protocol
+ECMM                  0%         0/       0       ECMM Ethernet communication
+                                                  manage
+EFMT                  0%         0/  1e8480       EFMTEST 802.3AH Test
+EOAM                  0%         0/  3d0900       EOAM1AG
+ESAP                  0%         0/  1e8480       ESAP eSap Adapter
+ETHA                  0%         0/       0       ETHA
+FCAT                  0%         0/       0       FCAT Catch Packets for
+                                                  debugging
+FECD                  0%         0/  7a1200       FECD Mod Manage Task
+FIB                   0%         0/  1e8480       FIB Forward Information Base
+FIB6                  0%         0/       0       FIB6IPv6 FIB

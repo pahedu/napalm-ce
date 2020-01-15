@@ -64,3 +64,6 @@ report.json
 
 .pytest_cache/
 .python-version
+
+test.py
+

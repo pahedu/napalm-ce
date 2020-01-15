@@ -62,7 +62,7 @@ IPV6_ADDR_REGEX_3 = r"[0-9a-fA-F]{1,3}:[0-9a-fA-F]{1,3}:[0-9a-fA-F]{1,3}:[0-9a-f
 # Should validate IPv6 address using an IP address library after matching with this regex
 IPV6_ADDR_REGEX = "(?:{}|{}|{})".format(IPV6_ADDR_REGEX_1, IPV6_ADDR_REGEX_2, IPV6_ADDR_REGEX_3)
 
-MAC_REGEX = r"[a-fA-F0-9]{4}\.[a-fA-F0-9]{4}\.[a-fA-F0-9]{4}"
+MAC_REGEX = r"[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}"
 VLAN_REGEX = r"\d{1,4}"
 RE_IPADDR = re.compile(r"{}".format(IP_ADDR_REGEX))
 RE_IPADDR_STRIP = re.compile(r"({})\n".format(IP_ADDR_REGEX))
@@ -940,6 +940,7 @@ class CEDriver(NetworkDriver):
         }
         """
         lldp_neighbors = {}
+
         return lldp_neighbors
 
     def __get_ntp_peers(self):
@@ -1219,4 +1220,16 @@ class CEDriver(NetworkDriver):
             fobj.write(config)
         return filename
 
-
+    def _platform_determine(self):
+        platform = 'Unknown'
+        show_ver = self.device.send_command('display version')
+        for line in show_ver.splitlines():
+            if 'VRP (R) software' in line:
+                search_result = re.search(r"\((?P<model>CE\S+|S\S+)\s+(?P<os_version>V\S+)\)", line)
+                if search_result is not None:
+                    model = search_result.group('model')
+                    if model.startswith('CE'):
+                        platform = "CE"
+                    elif model.startswith('S'):
+                        platform = "S"
+        return platform

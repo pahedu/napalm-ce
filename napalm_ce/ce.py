@@ -748,10 +748,15 @@ class CEDriver(NetworkDriver):
                 }
             ]
         """
+        platform = self._get_platform()
         arp_table = []
         output = self.device.send_command('display arp')
-        re_arp = r"(?P<ip_address>\d+\.\d+\.\d+\.\d+)\s+(?P<mac>\S+)\s+(?P<exp>\d+|)\s+" \
-                 r"(?P<type>I|D|S|O)\s+(?P<interface>\S+)"
+        if platform == "CE":
+            re_arp = r"(?P<ip_address>\d+\.\d+\.\d+\.\d+)\s+(?P<mac>\S+)\s+(?P<exp>\d+|)\s+" \
+                    r"(?P<type>I|D|S|O)\s+(?P<interface>\S+)"
+        if platform == "S":
+            re_arp = r"(?P<ip_address>\d+\.\d+\.\d+\.\d+)\s+(?P<mac>\S+)\s+(?P<exp>\d+|)\s+" \
+                     r"(?P<type>I|D|S|O).{2}\s+(?P<interface>\S+)"
         match = re.findall(re_arp, output, flags=re.M)
 
         for arp in match:
@@ -764,7 +769,7 @@ class CEDriver(NetworkDriver):
                 'interface': arp[4],
                 'mac': napalm.base.helpers.mac(arp[1]),
                 'ip': arp[0],
-                'age': -1.0,
+                'age': arp[2],
             }
             arp_table.append(entry)
         return arp_table

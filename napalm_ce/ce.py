@@ -816,9 +816,13 @@ class CEDriver(NetworkDriver):
         }
         """
         results = {}
+        platform = self._get_platform()
         command = 'display lldp neighbor brief'
         output = self.device.send_command(command)
-        re_lldp = r"(?P<local>\S+)\s+\d+\s+(?P<port>\S+)\s+(?P<hostname>\S+)"
+        if platform == "CE":
+            re_lldp = r"(?P<local>\S+)\s+\d+\s+(?P<port>\S+)\s+(?P<hostname>\S+)"
+        if platform == "S":
+            re_lldp = r"(?P<local>\S+)\s+(?P<hostname>\S+)\s+(?P<port>\S+)\s+\d+"
         match = re.findall(re_lldp, output, re.M)
         for neighbor in match:
             local_iface = neighbor[0]
@@ -826,10 +830,76 @@ class CEDriver(NetworkDriver):
                 results[local_iface] = []
 
             neighbor_dict = dict()
-            neighbor_dict['port'] = py23_compat.text_type(neighbor[1])
-            neighbor_dict['hostname'] = py23_compat.text_type(neighbor[2])
+            neighbor_dict['port'] = py23_compat.text_type(neighbor[2])
+            neighbor_dict['hostname'] = py23_compat.text_type(neighbor[1])
             results[local_iface].append(neighbor_dict)
         return results
+
+    def get_lldp_neighbors_detail(self, interface=''):
+        """
+        Return a detailed view of the LLDP neighbors as a dictionary.
+
+        Sample output:
+        {
+        'TenGigE0/0/0/8': [
+            {
+                'parent_interface': u'Bundle-Ether8',
+                'remote_chassis_id': u'8c60.4f69.e96c',
+                'remote_system_name': u'switch',
+                'remote_port': u'Eth2/2/1',
+                'remote_port_description': u'Ethernet2/2/1',
+                'remote_system_description': u'''huawei os''',
+                'remote_system_capab': u'B, R',
+                'remote_system_enable_capab': u'B'
+            }
+        ]
+        }
+        """
+        lldp = {}
+        lldp_neighbors = self.get_lldp_neighbors()
+
+        # Filter to specific interface
+        if interface:
+            lldp_data = lldp_neighbors.get(interface)
+            if lldp_data:
+                lldp_neighbors = {interface: lldp_data}
+            else:
+                lldp_neighbors = {}
+
+        for interface in lldp_neighbors:
+            local_port = interface
+            lldp_fields = self._lldp_detail_parser(interface)
+            number_entries = len(lldp_fields[0])
+
+            # re.findall will return a list. Make sure same number of entries always returned.
+            for test_list in lldp_fields:
+                if len(test_list) != number_entries:
+                    raise ValueError("Failure processing show lldp neighbors detail")
+
+            # Standardize the fields
+            port_id, port_description, chassis_id, system_name, system_description, \
+            system_capabilities, enabled_capabilities, remote_address = lldp_fields
+            standardized_fields = zip(port_id, port_description, chassis_id, system_name,
+                                      system_description, system_capabilities,
+                                      enabled_capabilities, remote_address)
+
+            lldp.setdefault(local_port, [])
+            for entry in standardized_fields:
+                remote_port_id, remote_port_description, remote_chassis_id, remote_system_name, \
+                remote_system_description, remote_system_capab, remote_enabled_capab, \
+                remote_mgmt_address = entry
+
+                lldp[local_port].append({
+                    'parent_interface': u'N/A',
+                    'remote_port': remote_port_id,
+                    'remote_port_description': remote_port_description,
+                    'remote_chassis_id': remote_chassis_id,
+                    'remote_system_name': remote_system_name,
+                    'remote_system_description': remote_system_description,
+                    'remote_system_capab': remote_system_capab,
+                    'remote_system_enable_capab': remote_enabled_capab})
+
+        return lldp
 
     def get_mac_address_table(self):
         """
@@ -890,24 +960,37 @@ class CEDriver(NetworkDriver):
         }
         """
         result = {}
-        command = 'display aaa local-user'
-        output = self.device.send_command(command)
-        re_user = r"(?P<username>\S+)\s+(Active|Block)(\s+\S+){3}\s+(\d+|--)"
-        match = re.findall(re_user, output, re.M)
-        try:
-            for user in match:
-                # level = -1 can not pass unit test
-                level = 0 if user[3] == '--' else int(user[3])
-                result.setdefault(user[0], {})['level'] = level
-                result[user[0]]['password'] = ''
-                result[user[0]]['sshkeys'] = []
-        except Exception:
-            msg = "Unexpected output data:\n{}".format(output)
-            raise ValueError(msg)
+        platform = self._get_platform()
+        if platform == "CE":
+            command = 'display aaa local-user'
+            output = self.device.send_command(command)
+            re_user = r"(?P<username>\S+)\s+(Active|Block)(\s+\S+){3}\s+(\d+|--)"
+            match = re.findall(re_user, output, re.M)
+            try:
+                for user in match:
+                    # level = -1 can not pass unit test
+                    level = 0 if user[3] == '--' else int(user[3])
+                    result.setdefault(user[0], {})['level'] = level
+                    result[user[0]]['password'] = ''
+                    result[user[0]]['sshkeys'] = []
+            except Exception:
+                msg = "Unexpected output data:\n{}".format(output)
+                raise ValueError(msg)
+        if platform == "S":
+            command = 'display local-user'
+            output = self.device.send_command(command)
+            re_user = r"(?P<username>\S+)\s+(?P<state>A|B)\s+\S+\s+(?P<adminlevel>\d+)"
+            match = re.findall(re_user, output, re.M)
+            try:
+                for user in match:
+                    int(user[2])
+                    result.setdefault(user[0], {})['level'] = level
+                    result[user[0]]['password'] = ''
+                    result[user[0]]['sshkeys'] = []
+            except Exception:
+                msg = "Unexpected output data:\n{}".format(output)
+                raise ValueError(msg)
 
-        # Password is encrypted and cannot be read
-        # command = 'display current-configuration | inc user'
-        # output = self.device.send_command(command)
         return result
 
     def rollback(self):
@@ -986,30 +1069,6 @@ class CEDriver(NetworkDriver):
             'chassis_id': py23_compat.text_type('')
         }
         return snmp_information
-
-    def __get_lldp_neighbors_detail(self, interface=''):
-        """
-        Return a detailed view of the LLDP neighbors as a dictionary.
-
-        Sample output:
-        {
-        'TenGigE0/0/0/8': [
-            {
-                'parent_interface': u'Bundle-Ether8',
-                'remote_chassis_id': u'8c60.4f69.e96c',
-                'remote_system_name': u'switch',
-                'remote_port': u'Eth2/2/1',
-                'remote_port_description': u'Ethernet2/2/1',
-                'remote_system_description': u'''huawei os''',
-                'remote_system_capab': u'B, R',
-                'remote_system_enable_capab': u'B'
-            }
-        ]
-        }
-        """
-        lldp_neighbors = {}
-
-        return lldp_neighbors
 
     def __get_ntp_peers(self):
         """
@@ -1301,3 +1360,27 @@ class CEDriver(NetworkDriver):
                     elif model.startswith('S'):
                         platform = "S"
         return platform
+
+    def _lldp_detail_parser(self, interface):
+
+        if interface.startswith("GE") or interface.startswith('XGE'):
+            interface.replace("GE", "GigabitEthernet")
+        command = "show lldp neighbors {} detail".format(interface)
+        output = self._send_command(command)
+
+        # Check if router supports the command
+        if 'Error: Unrecognized command found' in output:
+            raise ValueError("Command not supported by network device")
+
+        port_id = re.findall(r"Port ID\s+:(.+)", output)
+        port_description = re.findall(r"Port description\s+:(.+)", output)
+        chassis_id = re.findall(r"Chassis ID\s+:(.+)", output)
+        system_name = re.findall(r"System name\s+:(.+)", output)
+        system_description = re.findall(r"System description\s*?[:-]\s*(not advertised|.+)",
+                                        output)
+        system_description = [x.strip() for x in system_description]
+        system_capabilities = re.findall(r"System capabilities supported\s*?[:-](.+)", output)
+        enabled_capabilities = re.findall(r"System capabilities enabled\s*?[:-](.+)", output)
+        remote_address = re.findall(r"Management address.*[:-](not advertised|\d+\.\d+\.\d+\.\d+)", output)
+        return [port_id, port_description, chassis_id, system_name, system_description,
+                system_capabilities, enabled_capabilities, remote_address]

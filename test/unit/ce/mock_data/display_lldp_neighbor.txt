@@ -1,0 +1,81 @@
+40GE1/1/15 has 1 neighbor(s):
+
+Neighbor index                     :1
+Chassis type                       :MAC Address
+Chassis ID                         :a4c6-4f48-22c1
+Port ID subtype                    :Interface Name
+Port ID                            :40GE1/2/4
+Port description                   :--
+System name                        :sdc1-csw01-r01
+System description                 :Huawei Versatile Routing Platform Software
+VRP (R) software, Version 8.110 (CE8860EI V100R006C00SPC600)
+Copyright (C) 2012-2015 Huawei Technologies Co., Ltd.
+HUAWEI CE8860-4C-EI
+
+System capabilities supported      :bridge router
+System capabilities enabled        :bridge router
+Management address type            :IPv4
+Management address                 :10.255.240.102
+Expired time                       :109s
+
+Port VLAN ID(PVID)                 :1
+Port and Protocol VLAN ID(PPVID)   :unsupported
+VLAN name of VLAN 1                :VLAN1
+Protocol identity                  :--
+Auto-negotiation supported         :No
+Auto-negotiation enabled           :No
+OperMau                            :speed (40000) /duplex (Full)
+Link aggregation supported         :Yes
+Link aggregation enabled           :Yes
+Aggregation port ID                :7
+Maximum frame Size                 :9216
+Discovered time                    :2019-12-16 12:09:55
+
+EEE support                        :No
+Transmit Tw                        :65535
+Receive Tw                         :65535
+Fallback Receive Tw                :0
+Echo Transmit Tw                   :0
+Echo Receive Tw                    :0
+
+------------------------------------------------------------------------------------------------------------------------
+
+XGigabitEthernet0/0/4 has 1 neighbor(s):
+
+Neighbor index :1
+Chassis type   :MAC address
+Chassis ID     :dc99-14dc-ddc0
+Port ID type   :Interface name
+Port ID        :XGigabitEthernet0/0/3
+Port description    :PSG-2FL-04 XGE0/0/4
+System name         :psg-asw25-f2
+System description  :S1720-52GWR-PWR-4X-E
+Huawei Versatile Routing Platform Software
+VRP (R) software, Version 5.170 (S1720GWR V200R010C00SPC600)
+Copyright (C) 2000-2016 HUAWEI TECH CO., LTD
+System capabilities supported   :bridge
+System capabilities enabled     :bridge
+Management address type  :ipv4
+Management address value :10.250.4.25
+OID  :0.6.15.43.6.1.4.1.2011.5.25.41.1.2.1.1.1.
+Expired time   :96s
+
+Port VLAN ID(PVID)  :1
+VLAN name of VLAN  1:VLAN 0001
+
+Auto-negotiation supported    :No
+Auto-negotiation enabled      :No
+OperMau   :speed(10000)/duplex(Full)
+
+Power port class            :PD
+PSE power supported         :No
+PSE power enabled           :No
+PSE pairs control ability   :No
+Power pairs                 :Unknown
+Port power classification   :Unknown
+
+Link aggregation supported:Yes
+Link aggregation enabled :No
+Aggregation port ID      :0
+
+Maximum frame Size       :9216

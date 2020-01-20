@@ -820,9 +820,9 @@ class CEDriver(NetworkDriver):
         command = 'display lldp neighbor brief'
         output = self.device.send_command(command)
         if platform == "CE":
-            re_lldp = r"(?P<local>\S+)\s+\d+\s+(?P<port>\S+)\s+(?P<hostname>\S+)"
+            re_lldp = r"^(?P<local>\S+)\s+\d+\s+(?P<port>\S+)\s+(?P<hostname>\S+)"
         if platform == "S":
-            re_lldp = r"(?P<local>\S+)\s+(?P<hostname>\S+)\s+(?P<port>\S+)\s+\d+"
+            re_lldp = r"^(?P<local>\S+)\s+(?P<hostname>\S+)\s+(?P<port>\S+)\s+\d+"
         match = re.findall(re_lldp, output, re.M)
         for neighbor in match:
             local_iface = neighbor[0]
@@ -1364,9 +1364,9 @@ class CEDriver(NetworkDriver):
     def _lldp_detail_parser(self, interface):
 
         if interface.startswith("GE") or interface.startswith('XGE'):
-            interface.replace("GE", "GigabitEthernet")
-        command = "show lldp neighbors {} detail".format(interface)
-        output = self._send_command(command)
+            interface = interface.replace("GE", "GigabitEthernet")
+        command = "display lldp neighbor {}".format(interface)
+        output = self.device.send_command(command)
 
         # Check if router supports the command
         if 'Error: Unrecognized command found' in output:

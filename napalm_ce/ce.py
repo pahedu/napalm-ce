@@ -1365,7 +1365,7 @@ class CEDriver(NetworkDriver):
 
         if interface.startswith("GE") or interface.startswith('XGE'):
             interface = interface.replace("GE", "GigabitEthernet")
-        command = "display lldp neighbor {}".format(interface)
+        command = "display lldp neighbor interface {}".format(interface)
         output = self.device.send_command(command)
 
         # Check if router supports the command
